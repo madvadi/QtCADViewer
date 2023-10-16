@@ -12,6 +12,7 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
 
     gl_ptr->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
 
+
     gl_ptr->show();
 
 

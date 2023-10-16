@@ -40,12 +40,8 @@ protected:
 
     void initializeGL() override
     {
-        load.loadASCII("openfoamM.stl");
-
-        view = 0.0f;
-
         initializeOpenGLFunctions();
-        glClearColor(0.0, 0.0, 0.0, 0.0);
+        this->addMatrix();        
     }
 
     void resizeGL(int w, int h) override
@@ -57,6 +53,7 @@ protected:
 
     void paintGL() override
     {
+        glClearColor(0.0, 0.0, 0.0, 0.0);
         glClear(parClear);
 
         glMatrixMode(matrixMode);
@@ -66,12 +63,7 @@ protected:
         glLoadIdentity();
         
         // Transformations!
-        glTranslatef(0.0f, 0.0f, view);
-
-        glRotatef(45.0f, 1.0, 0.0, 0.0);
-        glRotatef(45.0f, 0.0, 0.0, 1.0);
-
-        glScalef(100.0f, 100.0f, 1.0f);
+        glLoadMatrixf(matrix);
 
         load.render();
 
@@ -92,6 +84,8 @@ private:
     GLenum matrixMode;
 
     GLenum parClear;
+
+    GLfloat* matrix;
 
     std::vector<GLfloat> glTrans3f[3];
 
