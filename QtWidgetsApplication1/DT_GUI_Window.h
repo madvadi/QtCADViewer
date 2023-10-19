@@ -38,7 +38,7 @@ private:
 	Ui::Form ui;
 
 protected:
-	/*
+	
 	void keyPressEvent(QKeyEvent* event) override
 	{
 		if (gl_ptr != NULL)
@@ -60,7 +60,7 @@ protected:
 
 
 		}
-	}*/
+	}
 
 	void resizeEvent(QResizeEvent* event) override
 	{

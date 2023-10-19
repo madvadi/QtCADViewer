@@ -3,11 +3,13 @@
 #define _OPENGLRENDER_H_
 
 
+#include <QtOpenGL>
+#include <gl\GLU.h>
 #include "qopengl.h"
 #include <qopenglwidget.h>
 #include <qopenglfunctions.h>
 #include <qkeysequence.h>
-//#include <qtimer.h>
+#include <qtimer.h>
 
 #include "Load.h"
 
@@ -40,8 +42,21 @@ protected:
 
     void initializeGL() override
     {
+
         initializeOpenGLFunctions();
-        this->addMatrix();        
+        
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+
+        //gluPerspective(45.0f, (float)width() / (float)height(), 0.01f, 100.0f);
+
+        glOrtho(-10.0f, width() , -height(), 10.0f, -10.0f, 10.0f);
+
+        gluLookAt(0.0f, 0.0f, 5.0f, 0.0, 0.0, -2.0, 0.0, 1.0, 0.0);
+        
+        this->addMatrix(); 
+        
+        glClearColor(0.0, 0.0, 0.0, 0.0);       
     }
 
     void resizeGL(int w, int h) override
@@ -53,7 +68,7 @@ protected:
 
     void paintGL() override
     {
-        glClearColor(0.0, 0.0, 0.0, 0.0);
+        
         glClear(parClear);
 
         glMatrixMode(matrixMode);
@@ -63,7 +78,9 @@ protected:
         glLoadIdentity();
         
         // Transformations!
-        glLoadMatrixf(matrix);
+       // glLoadMatrixf(matrix);
+
+      
 
         load.render();
 
@@ -72,6 +89,10 @@ protected:
 public slots:
     void animate()
     {
+        view = view + delta;
+
+        delta = 0.0f;
+
         update();
     }
 
@@ -86,6 +107,8 @@ private:
     GLenum parClear;
 
     GLfloat* matrix;
+
+    GLfloat delta;
 
     std::vector<GLfloat> glTrans3f[3];
 

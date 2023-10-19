@@ -4,7 +4,13 @@
 QGL::QGL(QWidget* parent) : QOpenGLWidget(parent)
 {
 
+
+    QTimer* timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(animate()));
+    timer->start(16); // 60 FPS
+
     view = 0.0f;
+    delta = 0.0f;
 
     polygonFace = GL_FRONT_AND_BACK;
     polygonMode = GL_LINE;
@@ -16,9 +22,6 @@ QGL::QGL(QWidget* parent) : QOpenGLWidget(parent)
     matrix = new GLfloat[16];
 
     load.loadASCII("openfoamM.stl");
-
-    view = 0.0f;
-
 
     /*
     for (int i = 0; i < 16; i++)
@@ -41,6 +44,8 @@ void QGL::initClear(GLenum pparClear)
 
 void QGL::addMatrix()
 {
+
+   // glMatrixMode(matrixMode);
 
     glPushMatrix();
 
@@ -79,7 +84,7 @@ float& QGL::return_view()
 
 void QGL::return_view(float increase)
 {
-    view = view + increase;
+    delta = delta + increase;
 };
 
 QGL::~QGL() {
