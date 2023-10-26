@@ -22,6 +22,8 @@ class DT_GUI_WidgetTest : public QMainWindow
 public:
 	DT_GUI_WidgetTest(QWidget* parent = nullptr);
 
+	void mouseMoveEvent(QMouseEvent* event)  override;
+
 
 	void InitAux();
 
@@ -35,32 +37,13 @@ private:
 
 	TextBrowserLogger* Logger;
 
+	//MouseTracker mouseP;
+
 	Ui::Form ui;
 
 protected:
-	
-	void keyPressEvent(QKeyEvent* event) override
-	{
-		if (gl_ptr != NULL)
-		{
-
-			QString str = event->text();
-
-			int keyi = event->key();
-
-			qDebug() << "key: " << str;
-			qDebug() << "key: " << QString::number(keyi);
-
-			if (keyi == 50) {
-				gl_ptr->return_view(-0.5f);
-			}
-			else if(keyi == 56) {
-				gl_ptr->return_view(0.5f);
-			}
 
 
-		}
-	}
 
 	void resizeEvent(QResizeEvent* event) override
 	{

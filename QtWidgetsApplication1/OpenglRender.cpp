@@ -1,15 +1,21 @@
 #include "OpenglRender.h"
 
 
-QGL::QGL(QWidget* parent) : QOpenGLWidget(parent)
+QGL::QGL(float x, float y, QWidget* parent) : QOpenGLWidget(parent)
 {
 
+    obj_key= new KeyEnterReceiver;
 
-    QTimer* timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(animate()));
-    timer->start(16); // 60 FPS
+    xwin = x;
+    ywin = y;
 
-    view = 0.0f;
+    view_y = 0.0f;
+    view_x = 0.0f;
+    view_z = 1.0f;
+
+    mx = 0.0f;
+    my = 0.0f;
+
     delta = 0.0f;
 
     polygonFace = GL_FRONT_AND_BACK;
@@ -21,12 +27,17 @@ QGL::QGL(QWidget* parent) : QOpenGLWidget(parent)
 
     matrix = new GLfloat[16];
 
-    load.loadASCII("openfoamM.stl");
-
-    /*
+    load.loadASCII("openfoamM.stl");    
+   
+    
     for (int i = 0; i < 16; i++)
-        matrix[i] = 0.0f;
-    */
+        matrix[i] = 0.0f;    
+
+    
+    QTimer* timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(animate()));
+    timer->start(16); // 60 FPS
+    
 };
 
 void QGL::initMatrixMode(GLenum matMode)
@@ -45,25 +56,19 @@ void QGL::initClear(GLenum pparClear)
 void QGL::addMatrix()
 {
 
-   // glMatrixMode(matrixMode);
+   glMatrixMode(matrixMode);
 
     glPushMatrix();
 
     // Transformations!
-    glTranslatef(0.0f, 0.0f, view);
+    glTranslatef(view_x, view_y, 0.0f);
 
-    glRotatef(45.0f, 1.0, 0.0, 0.0);
-    glRotatef(45.0f, 0.0, 0.0, 1.0);
-
-    glScalef(100.0f, 100.0f, 1.0f);
 
 
     //Get the Matrix before the finish initialisation!
     glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
 
     glPopMatrix();
-
-
 
 };
 
@@ -79,12 +84,22 @@ void QGL::initPolygon(GLenum polFace, GLenum polMode)
 
 float& QGL::return_view()
 {
-    return view;
+    return view_x;
 };
 
-void QGL::return_view(float increase)
+void QGL::return_view_x(float increase)
 {
-    delta = delta + increase;
+    view_x = view_x + increase;
+};
+
+void QGL::return_view_y(float increase)
+{
+    view_y = view_y + increase;
+};
+
+void QGL::return_view_z(float increase)
+{
+    view_z = view_z + increase;
 };
 
 QGL::~QGL() {

@@ -8,7 +8,8 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
 
     ui.setupUi(this);
 
-    gl_ptr = new QGL(ui.openGLWidget);
+
+    gl_ptr = new QGL((float)this->width(), (float)this->height(), ui.openGLWidget);
 
     gl_ptr->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
 
@@ -38,7 +39,7 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
 
     ui.graphicsView->setScene(scene);
 
-
+    
     ui.pushButton->setIcon(IC1);
     ui.pushButton->setIconSize(pix1.rect().size());
 
@@ -56,17 +57,22 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
     ui.pushButton_5->resize(pix5.rect().height(),pix5.rect().width());
 
 
+    ui.pushButton_6->setIcon(IC5);
+    ui.pushButton_6->setIconSize(pix5.rect().size());
+
     ui.pushButton_7->setIcon(IC5);
     ui.pushButton_7->setIconSize(pix5.rect().size());
+    ui.pushButton_8->setIcon(IC5);
+    ui.pushButton_8->setIconSize(pix5.rect().size());
 
-    ui.pushButton_11->setIcon(IC5);
-    ui.pushButton_11->setIconSize(pix5.rect().size());
-    ui.pushButton_12->setIcon(IC5);
-    ui.pushButton_12->setIconSize(pix5.rect().size());
  
     this->setCentralWidget(ui.centralwidget);
 
     ui.centralwidget->setLayout(ui.verticalLayout_4);
+
+    this->installEventFilter(gl_ptr->obj_key);
+
+    setMouseTracking(true);
 
 
 };
@@ -96,6 +102,15 @@ void DT_GUI_WidgetTest::InitAux()
 {
 
 };
+
+void DT_GUI_WidgetTest::mouseMoveEvent(QMouseEvent* event)
+{
+
+    qDebug() << "Mouse Pos:" << event->pos();
+
+    QWidget::mouseMoveEvent(event);
+};
+
 
 
 DT_GUI_WidgetTest::~DT_GUI_WidgetTest()

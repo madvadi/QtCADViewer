@@ -96,6 +96,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="KeyEnterReceiver.cpp" />
     <ClCompile Include="OpenglRender.cpp" />
     <ClCompile Include="TableViewCustom.cpp" />
     <ClCompile Include="TextBrowserLogger.cpp" />
@@ -107,6 +108,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="KeyEnterReceiver.h" />
     <ClInclude Include="Load.h" />
     <ClInclude Include="TextBrowserLogger.h" />
     <QtMoc Include="TableViewCustom.h" />

@@ -11,15 +11,19 @@
 #include <qkeysequence.h>
 #include <qtimer.h>
 
+#include "KeyEnterReceiver.h"
+
 #include "Load.h"
+
+
+
 
 class QGL : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
 public:
 
-
-    QGL(QWidget* parent = nullptr);
+    QGL(float x, float y, QWidget* parent = nullptr);
 
     void initColor(float r, float g, float b);
 
@@ -31,11 +35,19 @@ public:
 
     void initMatrixMode(GLenum matMode);
 
+    void return_view_x(float increase);
+
+    void return_view_y(float increase);
+
+    void return_view_z(float increase);
+
     float& return_view();
 
     void return_view(float increase);
 
     ~QGL();
+
+    KeyEnterReceiver* obj_key;
 
 protected:
 
@@ -45,17 +57,10 @@ protected:
 
         initializeOpenGLFunctions();
         
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
+        camera();
 
-        //gluPerspective(45.0f, (float)width() / (float)height(), 0.01f, 100.0f);
+        this->addMatrix();
 
-        glOrtho(-10.0f, width() , -height(), 10.0f, -10.0f, 10.0f);
-
-        gluLookAt(0.0f, 0.0f, 5.0f, 0.0, 0.0, -2.0, 0.0, 1.0, 0.0);
-        
-        this->addMatrix(); 
-        
         glClearColor(0.0, 0.0, 0.0, 0.0);       
     }
 
@@ -71,6 +76,8 @@ protected:
         
         glClear(parClear);
 
+        camera();
+
         glMatrixMode(matrixMode);
 
         glPolygonMode(polygonFace,polygonMode);
@@ -78,26 +85,63 @@ protected:
         glLoadIdentity();
         
         // Transformations!
-       // glLoadMatrixf(matrix);
+        glLoadMatrixf(matrix);
+
+        glTranslatef(view_x, view_y, 0.0f);
 
       
-
         load.render();
+
+        glFlush();
 
     }
 
 public slots:
     void animate()
     {
-        view = view + delta;
+        if (obj_key->isLeftKeyPressed == true) this->return_view_x(-0.01f);
+        if(obj_key->isUpKeyPressed == true) this->return_view_y(0.01f);
+        if(obj_key->isRightKeyPressed == true) this->return_view_x(0.01f);
+        if(obj_key->isDownKeyPressed == true) this->return_view_y(-0.01f);
+        
+        // Convert the position to the OpenGL coordinate system
 
-        delta = 0.0f;
+        if (obj_key->return_x() != 0.0f && obj_key->return_y() != 0.0f)
+        {
+            mx = (2.0f * obj_key->return_x() / xwin) - 1.0f;
+            my = 1.0f - (2.0f * obj_key->return_y() / ywin);
+        }        
+
+        qDebug() << "OpenGL Mouse position: " << mx << ", " << my;
+
+       
+        
+
+        view_z = obj_key->return_angleWheel();
+
+        if (view_z <= 0.0f)
+            view_z = 1.0f;
 
         update();
+    
     }
 
 private:
 
+    void camera()
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+
+        gluPerspective(45.0f / view_z, (float)width() / (float)height(), 0.01f, 100.0f);
+
+        gluLookAt(mx, my, 1.0f, mx, my, 0.5f, 0.0, 1.0, 0.0);
+
+
+    };
+
+    float xwin;
+    float ywin;
 
     GLenum polygonFace;
     GLenum polygonMode;
@@ -112,9 +156,11 @@ private:
 
     std::vector<GLfloat> glTrans3f[3];
 
-    float rotationAngle;
+    float view_x, view_y, view_z;
 
-    float view;
+
+    float mx,my;
+
 
     loadSTL load;
 };
