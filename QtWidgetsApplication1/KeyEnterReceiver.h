@@ -24,6 +24,8 @@ public:
 
     float return_angleWheel();
 
+    void equal_angleWheel(float value);
+
 
     float return_x();
 

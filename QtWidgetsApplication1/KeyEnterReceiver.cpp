@@ -119,19 +119,21 @@ bool KeyEnterReceiver::eventFilter(QObject* obj, QEvent* event)
 		return true;
 
 	}
-	else if (event->type() == QEvent::Wheel) {
+	else if (event->type() == QEvent::Wheel) 
+	{
+
 		QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
 
+		x = wheelEvent->position().x();
 
-
-		x = wheelEvent->globalPosition().x();
-
-		y = wheelEvent->globalPosition().y();
-
-
+	    y = wheelEvent->position().y();
 
 		angleWheel = angleWheel + (float)wheelEvent->angleDelta().y() / 120.0f;
-		qDebug() << "Wheel movement: " << angleWheel;
+
+		//angleWheel = (float)wheelEvent->angleDelta().y() / 120.0f;
+
+		qDebug() << "Wheel Movement: " << angleWheel;
+
 		return true; 
 	}
 	else {
@@ -148,6 +150,10 @@ float KeyEnterReceiver::return_angleWheel()
 };
 
 
+void KeyEnterReceiver::equal_angleWheel(float value)
+{
+	angleWheel = value;
+};
 
 float KeyEnterReceiver::return_x()
 {

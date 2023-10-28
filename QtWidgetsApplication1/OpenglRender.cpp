@@ -11,10 +11,14 @@ QGL::QGL(float x, float y, QWidget* parent) : QOpenGLWidget(parent)
 
     view_y = 0.0f;
     view_x = 0.0f;
-    view_z = 1.0f;
+    view_z = 45.0f;
 
     mx = 0.0f;
     my = 0.0f;
+
+
+    camera_x = 0.0f;
+    camera_y = 0.0f;
 
     delta = 0.0f;
 
@@ -24,8 +28,6 @@ QGL::QGL(float x, float y, QWidget* parent) : QOpenGLWidget(parent)
     matrixMode = GL_MODELVIEW;
 
     parClear = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
-
-    matrix = new GLfloat[16];
 
     load.loadASCII("openfoamM.stl");    
    
@@ -37,6 +39,7 @@ QGL::QGL(float x, float y, QWidget* parent) : QOpenGLWidget(parent)
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(animate()));
     timer->start(16); // 60 FPS
+
     
 };
 

@@ -15,9 +15,6 @@
 
 #include "Load.h"
 
-
-
-
 class QGL : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
@@ -56,10 +53,8 @@ protected:
     {
 
         initializeOpenGLFunctions();
-        
-        camera();
 
-        this->addMatrix();
+        camera();
 
         glClearColor(0.0, 0.0, 0.0, 0.0);       
     }
@@ -83,13 +78,9 @@ protected:
         glPolygonMode(polygonFace,polygonMode);
 
         glLoadIdentity();
-        
-        // Transformations!
-        glLoadMatrixf(matrix);
 
         glTranslatef(view_x, view_y, 0.0f);
 
-      
         load.render();
 
         glFlush();
@@ -99,28 +90,48 @@ protected:
 public slots:
     void animate()
     {
-        if (obj_key->isLeftKeyPressed == true) this->return_view_x(-0.01f);
-        if(obj_key->isUpKeyPressed == true) this->return_view_y(0.01f);
-        if(obj_key->isRightKeyPressed == true) this->return_view_x(0.01f);
-        if(obj_key->isDownKeyPressed == true) this->return_view_y(-0.01f);
-        
-        // Convert the position to the OpenGL coordinate system
+        xwin = this->width();
+        ywin = this->height();
 
-        if (obj_key->return_x() != 0.0f && obj_key->return_y() != 0.0f)
+        if(obj_key->isLeftKeyPressed == true) 
+            this->return_view_x(-0.01f);
+        if(obj_key->isUpKeyPressed == true) 
+            this->return_view_y(0.01f);
+        if(obj_key->isRightKeyPressed == true) 
+            this->return_view_x(0.01f);
+        if(obj_key->isDownKeyPressed == true) 
+            this->return_view_y(-0.01f);
+        
+        // Convert the position to the OpenGL coordinate system.
+        mx = ((2.0f * obj_key->return_x() / xwin) - 1.0f);
+        my = (1.0f - (2.0f * obj_key->return_y() / ywin));
+
+        if (fabs(obj_key->return_angleWheel()) != 0.0f
+            && view_z > 1.0f && view_z < 45.0f)
         {
-            mx = (2.0f * obj_key->return_x() / xwin) - 1.0f;
-            my = 1.0f - (2.0f * obj_key->return_y() / ywin);
-        }        
+            float _x = 0.01f;
 
-        qDebug() << "OpenGL Mouse position: " << mx << ", " << my;
+            _x = copysignf(_x,obj_key->return_angleWheel());
 
-       
+            camera_x = camera_x + mx * _x;
+            camera_y = camera_y + my* _x;
+
+            qDebug() << "OpenGL Mouse position: " << camera_x << ", " << camera_y;
+        }
         
 
-        view_z = obj_key->return_angleWheel();
+        view_z = view_z - obj_key->return_angleWheel();
 
-        if (view_z <= 0.0f)
+        obj_key->equal_angleWheel(0.0f);
+
+        if (view_z <= 1.0f)
+        {
             view_z = 1.0f;
+        }
+        else if (view_z >= 45.0f)
+        {
+            view_z = 45.0f;
+        }
 
         update();
     
@@ -131,12 +142,13 @@ private:
     void camera()
     {
         glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
+        glLoadIdentity(); 
 
-        gluPerspective(45.0f / view_z, (float)width() / (float)height(), 0.01f, 100.0f);
+        gluPerspective(/*45.0f */ view_z, (float)width() / (float)height(), 0.01f, 100.0f);
 
-        gluLookAt(mx, my, 1.0f, mx, my, 0.5f, 0.0, 1.0, 0.0);
-
+        gluLookAt(camera_x, camera_y, 1.0f,
+            camera_x, camera_y, 0.1f,
+            0.0f,  1.0f, 0.0f);
 
     };
 
@@ -150,7 +162,8 @@ private:
 
     GLenum parClear;
 
-    GLfloat* matrix;
+    //GLfloat* matrix;
+    GLfloat matrix[16];
 
     GLfloat delta;
 
@@ -160,6 +173,8 @@ private:
 
 
     float mx,my;
+
+    float camera_x, camera_y;
 
 
     loadSTL load;
