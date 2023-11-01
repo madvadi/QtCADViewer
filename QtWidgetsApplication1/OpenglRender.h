@@ -56,7 +56,8 @@ protected:
 
         camera();
 
-        glClearColor(0.0, 0.0, 0.0, 0.0);       
+        glClearColor(0.0, 0.0, 0.0, 0.0);  
+
     }
 
     void resizeGL(int w, int h) override
@@ -68,7 +69,8 @@ protected:
 
     void paintGL() override
     {
-        
+      
+
         glClear(parClear);
 
         camera();

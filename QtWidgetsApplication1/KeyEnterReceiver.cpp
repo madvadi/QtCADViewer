@@ -14,6 +14,11 @@ KeyEnterReceiver::KeyEnterReceiver(QWidget* parent) : QWidget(parent)
 	isNumUpArrowKeyPressed = false;
 	isNumDownArrowKeyPressed = false;
 
+
+	isRightMouseButtonPressed = false;
+	isLeftMouseButtonPressed = false;
+	isMiddleMouseButtonPressed = false;
+
 	angleWheel = 0.0f;
 
 	x = 0.0f;
@@ -21,10 +26,21 @@ KeyEnterReceiver::KeyEnterReceiver(QWidget* parent) : QWidget(parent)
 
 };
 
+float KeyEnterReceiver::return_MouseMovement()
+{
+	this->mouseGrabber();
+
+
+	return 0.0f;
+};
+
 
 bool KeyEnterReceiver::eventFilter(QObject* obj, QEvent* event)
 {
-	
+	/*
+	QWidget* MouseGrabber = this->mouseGrabber();
+
+	MouseGrabber->grabMouse();*/
 
 	if (event->type() == QEvent::KeyPress) {
 		QKeyEvent* key = static_cast<QKeyEvent*>(event);
@@ -90,12 +106,18 @@ bool KeyEnterReceiver::eventFilter(QObject* obj, QEvent* event)
 
 		QMouseEvent* eventMouse = (QMouseEvent*)event;
 		if (eventMouse->button() == Qt::LeftButton) {
+
+			isRightMouseButtonPressed = true;
 			qDebug() << "Left button pressed at: " << eventMouse->pos();
 		}
 		if (eventMouse->button() == Qt::RightButton) {
+
+			isLeftMouseButtonPressed = true;
 			qDebug() << "Right button pressed at: " << eventMouse->pos();
 		}
 		if (eventMouse->button() == Qt::MiddleButton) {
+
+			isMiddleMouseButtonPressed = true;
 			qDebug() << "Middle button pressed at: " << eventMouse->pos();
 		}
 
@@ -107,12 +129,18 @@ bool KeyEnterReceiver::eventFilter(QObject* obj, QEvent* event)
 
 		QMouseEvent* eventMouse = (QMouseEvent*)event;
 		if (eventMouse->button() == Qt::LeftButton) {
+
+			isRightMouseButtonPressed = false;
 			qDebug() << "Left button pressed at: " << eventMouse->pos();
 		}
 		if (eventMouse->button() == Qt::RightButton) {
+
+			isLeftMouseButtonPressed = false;
 			qDebug() << "Right button pressed at: " << eventMouse->pos();
 		}
 		if (eventMouse->button() == Qt::MiddleButton) {
+
+			isMiddleMouseButtonPressed = false;
 			qDebug() << "Middle button pressed at: " << eventMouse->pos();
 		}
 

@@ -25,7 +25,7 @@ public:
 	void mouseMoveEvent(QMouseEvent* event)  override;
 
 
-	void InitAux();
+	void resizeGLContext();
 
 	~DT_GUI_WidgetTest();
 

@@ -22,7 +22,13 @@ public:
     bool isNumUpArrowKeyPressed;
     bool isNumDownArrowKeyPressed;
 
+    bool isRightMouseButtonPressed;
+    bool isLeftMouseButtonPressed;
+    bool isMiddleMouseButtonPressed;
+
     float return_angleWheel();
+
+    float return_MouseMovement();
 
     void equal_angleWheel(float value);
 

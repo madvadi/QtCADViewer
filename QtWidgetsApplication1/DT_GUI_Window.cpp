@@ -98,9 +98,9 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext& context, con
 
 };
 
-void DT_GUI_WidgetTest::InitAux()
+void DT_GUI_WidgetTest::resizeGLContext()
 {
-
+    gl_ptr->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
 };
 
 void DT_GUI_WidgetTest::mouseMoveEvent(QMouseEvent* event)
