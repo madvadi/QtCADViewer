@@ -38,7 +38,6 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
     scene->addPixmap(pix);
 
     ui.graphicsView->setScene(scene);
-
     
     ui.pushButton->setIcon(IC1);
     ui.pushButton->setIconSize(pix1.rect().size());

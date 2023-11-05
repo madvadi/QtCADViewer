@@ -16,9 +16,18 @@ QGL::QGL(float x, float y, QWidget* parent) : QOpenGLWidget(parent)
     mx = 0.0f;
     my = 0.0f;
 
+    mousemovex = 0.0f;
+    mousemovey = 0.0f;
+
+    pre_x = 0.0f;
+    pre_y = 0.0f;
 
     camera_x = 0.0f;
     camera_y = 0.0f;
+
+    anglex = 0.0f; 
+    angley = 0.0f;
+
 
     delta = 0.0f;
 

@@ -83,6 +83,10 @@ protected:
 
         glTranslatef(view_x, view_y, 0.0f);
 
+        glRotatef(anglex,0.0f,1.0f,0.0f);
+
+        glRotatef(angley, 1.0f, 0.0f, 0.0f);
+
         load.render();
 
         glFlush();
@@ -90,6 +94,7 @@ protected:
     }
 
 public slots:
+
     void animate()
     {
         xwin = this->width();
@@ -103,11 +108,38 @@ public slots:
             this->return_view_x(0.01f);
         if(obj_key->isDownKeyPressed == true) 
             this->return_view_y(-0.01f);
-        
+
         // Convert the position to the OpenGL coordinate system.
         mx = ((2.0f * obj_key->return_x() / xwin) - 1.0f);
         my = (1.0f - (2.0f * obj_key->return_y() / ywin));
 
+
+
+        // Grab the screen and move the scene around.
+        if (obj_key->isLeftMouseButtonPressed == true)
+        {
+
+            camera_x = camera_x - (mx - pre_x)/ 10.0f;
+            camera_y = camera_y - (my - pre_y)/ 10.0f;
+        }
+
+
+        pre_x= mx;
+        pre_y= my;
+
+        // Rotate the model.
+        if (obj_key->isMiddleMouseButtonPressed == true)
+        {
+            anglex = anglex + (midx - mx)*100.0f;
+            angley = angley + (midy - my)*100.0f;
+
+        }
+
+        midx = mx; 
+        midy = my;
+
+
+        // Control the zoom!        
         if (fabs(obj_key->return_angleWheel()) != 0.0f
             && view_z > 1.0f && view_z < 45.0f)
         {
@@ -116,12 +148,10 @@ public slots:
             _x = copysignf(_x,obj_key->return_angleWheel());
 
             camera_x = camera_x + mx * _x;
-            camera_y = camera_y + my* _x;
+            camera_y = camera_y + my * _x;
 
-            qDebug() << "OpenGL Mouse position: " << camera_x << ", " << camera_y;
         }
         
-
         view_z = view_z - obj_key->return_angleWheel();
 
         obj_key->equal_angleWheel(0.0f);
@@ -148,9 +178,10 @@ private:
 
         gluPerspective(/*45.0f */ view_z, (float)width() / (float)height(), 0.01f, 100.0f);
 
-        gluLookAt(camera_x, camera_y, 1.0f,
-            camera_x, camera_y, 0.1f,
+        gluLookAt(camera_x,camera_y, 1.0f,
+            camera_x, camera_y, 0.0f,
             0.0f,  1.0f, 0.0f);
+
 
     };
 
@@ -178,6 +209,13 @@ private:
 
     float camera_x, camera_y;
 
+    float mousemovex,mousemovey;
+
+    float pre_x, pre_y;
+
+    float anglex, angley;
+
+    float midx, midy;
 
     loadSTL load;
 };

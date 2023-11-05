@@ -38,6 +38,12 @@ public:
     float return_y();
 
 
+    float pressed_x;
+
+    float pressed_y;
+
+
+
 private:
 
     // Different in the mouse wheel movement!
