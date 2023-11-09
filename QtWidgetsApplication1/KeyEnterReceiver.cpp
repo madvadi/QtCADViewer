@@ -215,3 +215,16 @@ float KeyEnterReceiver::return_y()
 	return y;
 };
 
+float KeyEnterReceiver::return_x(QWidget* ptr)
+{
+
+
+	return ptr->mapFromGlobal(QCursor::pos()).x();
+};
+
+float KeyEnterReceiver::return_y(QWidget* ptr)
+{
+
+	return ptr->mapFromGlobal(QCursor::pos()).y();
+};
+

@@ -38,6 +38,11 @@ public:
     float return_y();
 
 
+    float return_x(QWidget* ptr);
+
+    float return_y(QWidget* ptr);
+
+
     float pressed_x;
 
     float pressed_y;

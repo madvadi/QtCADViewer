@@ -22,7 +22,7 @@ class DT_GUI_WidgetTest : public QMainWindow
 public:
 	DT_GUI_WidgetTest(QWidget* parent = nullptr);
 
-	void mouseMoveEvent(QMouseEvent* event)  override;
+	//void mouseMoveEvent(QMouseEvent* event)  override;
 
 
 	void resizeGLContext();

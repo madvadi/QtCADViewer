@@ -69,9 +69,12 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
 
     ui.centralwidget->setLayout(ui.verticalLayout_4);
 
-    this->installEventFilter(gl_ptr->obj_key);
+    //this->installEventFilter(gl_ptr->obj_key);
 
-    setMouseTracking(true);
+   // setMouseTracking(true);
+
+
+    gl_ptr->installEventFilter((*gl_ptr).obj_key);
 
 
 };
@@ -100,14 +103,6 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext& context, con
 void DT_GUI_WidgetTest::resizeGLContext()
 {
     gl_ptr->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
-};
-
-void DT_GUI_WidgetTest::mouseMoveEvent(QMouseEvent* event)
-{
-
-    qDebug() << "Mouse Pos:" << event->pos();
-
-    QWidget::mouseMoveEvent(event);
 };
 
 

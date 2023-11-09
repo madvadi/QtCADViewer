@@ -5,6 +5,8 @@
 
 #include <QtOpenGL>
 #include <gl\GLU.h>
+#include <glm\vec3.hpp> //
+#include <glm\glm.hpp>  //
 #include "qopengl.h"
 #include <qopenglwidget.h>
 #include <qopenglfunctions.h>
@@ -42,6 +44,17 @@ public:
 
     void return_view(float increase);
 
+    void render_sphere(float x, float y, float z, float radius, int vCount);
+
+    void render_star(float x, float y, float z, float size);
+
+    void render_star(double x, double y, double z, double size);
+
+    void project_cursor();
+
+
+    void multiplyMatrices(const float* matrix1, const float* matrix2, float* result);
+
     ~QGL();
 
     KeyEnterReceiver* obj_key;
@@ -62,14 +75,13 @@ protected:
 
     void resizeGL(int w, int h) override
     {
-
+        
         glViewport(0, 0, w, h);
 
     }
 
     void paintGL() override
     {
-      
 
         glClear(parClear);
 
@@ -81,6 +93,10 @@ protected:
 
         glLoadIdentity();
 
+
+        glGetFloatv(GL_MODELVIEW_MATRIX, view);
+
+
         glTranslatef(view_x, view_y, 0.0f);
 
         glRotatef(anglex,0.0f,1.0f,0.0f);
@@ -89,6 +105,10 @@ protected:
 
         load.render();
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        this->project_cursor();
+        
         glFlush();
 
     }
@@ -100,6 +120,7 @@ public slots:
         xwin = this->width();
         ywin = this->height();
 
+        /*
         if(obj_key->isLeftKeyPressed == true) 
             this->return_view_x(-0.01f);
         if(obj_key->isUpKeyPressed == true) 
@@ -108,24 +129,31 @@ public slots:
             this->return_view_x(0.01f);
         if(obj_key->isDownKeyPressed == true) 
             this->return_view_y(-0.01f);
+        */
 
         // Convert the position to the OpenGL coordinate system.
-        mx = ((2.0f * obj_key->return_x() / xwin) - 1.0f);
-        my = (1.0f - (2.0f * obj_key->return_y() / ywin));
+        mx = ((2.0f * obj_key->return_x(this) / xwin) - 1.0f);
+        my = (1.0f - (2.0f * obj_key->return_y(this) / ywin));
 
+        /*
+        qDebug() << "standard cursor x: " << obj_key->return_x(this) << " standard cursor y: " << obj_key->return_y(this);
 
+        qDebug() << "cursor x: " << mx << " cursor y: " << my;*/
 
         // Grab the screen and move the scene around.
         if (obj_key->isLeftMouseButtonPressed == true)
         {
+            // Clicked on something!
 
             camera_x = camera_x - (mx - pre_x)/ 10.0f;
             camera_y = camera_y - (my - pre_y)/ 10.0f;
+
         }
 
 
-        pre_x= mx;
-        pre_y= my;
+        pre_x = mx;
+        pre_y = my;
+
 
         // Rotate the model.
         if (obj_key->isMiddleMouseButtonPressed == true)
@@ -178,9 +206,22 @@ private:
 
         gluPerspective(/*45.0f */ view_z, (float)width() / (float)height(), 0.01f, 100.0f);
 
+
+
         gluLookAt(camera_x,camera_y, 1.0f,
             camera_x, camera_y, 0.0f,
             0.0f,  1.0f, 0.0f);
+
+        glGetFloatv(GL_PROJECTION_MATRIX, lookat);
+
+
+        project_y = tan(view_z*0.5f)*1.0f;
+
+        project_x = project_y * (float)width() / (float)height();
+
+        project_y = camera_y + project_y;
+
+        project_x = camera_x + project_x;
 
 
     };
@@ -198,6 +239,10 @@ private:
     //GLfloat* matrix;
     GLfloat matrix[16];
 
+    GLfloat view[16];
+
+    GLfloat lookat[16];
+
     GLfloat delta;
 
     std::vector<GLfloat> glTrans3f[3];
@@ -209,9 +254,14 @@ private:
 
     float camera_x, camera_y;
 
+
+    float project_y, project_x;
+
     float mousemovex,mousemovey;
 
     float pre_x, pre_y;
+
+    GLfloat px, py, pz;
 
     float anglex, angley;
 

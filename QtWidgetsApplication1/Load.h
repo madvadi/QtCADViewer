@@ -30,6 +30,7 @@ public:
 
 	void render();
 
+	std::vector<float> xyz;
 
 private:
 
@@ -44,7 +45,7 @@ private:
 
 	float* xyz_f;
 
-	std::vector<float> xyz;
+
 
 };
 

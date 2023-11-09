@@ -8,7 +8,7 @@ loadSTL::loadSTL()
 
 	header_size = 0;
 
-	xyz_f = NULL;
+	(*this).xyz_f = NULL;
 
 	cptr = NULL;
 
@@ -16,7 +16,7 @@ loadSTL::loadSTL()
 loadSTL::~loadSTL()
 {
 
-	if (xyz_f != NULL) delete[] xyz_f;
+	if ((*this).xyz_f != NULL) delete[] (*this).xyz_f;
 	if (cptr != NULL) delete[] cptr;
 
 };
@@ -50,7 +50,7 @@ void loadSTL::loadBIN(const char* filename)
 
 	int num_crood = (int)ceil(9 * Ntrig);
 
-	xyz_f = new float[num_crood];
+	(*this).xyz_f = new float[num_crood];
 
 	fseek(PTRFILE, 12 * sizeof(char), SEEK_CUR);
 
@@ -60,9 +60,9 @@ void loadSTL::loadBIN(const char* filename)
 	//while( count < 2/*Ntrig*/)
 	for (int i = 0; i < 9 * Ntrig; i = i + 1)
 	{
-		//if(fread(xyz_f,sizeof(float),9,PTRFILE)!=9) printf("fread has fucked up \n");
+		//if(fread((*this).xyz_f,sizeof(float),9,PTRFILE)!=9) printf("fread has fucked up \n");
 
-		if (fread(&xyz_f[i], sizeof(float), 1, PTRFILE) != 1) printf("fread has fucked up \n");
+		if (fread(&(*this).xyz_f[i], sizeof(float), 1, PTRFILE) != 1) printf("fread has fucked up \n");
 
 		if (count == 8)
 		{
@@ -110,9 +110,9 @@ void loadSTL::loadASCII(const char* filename)
 		{
 			fscanf(PTRFILE, "%f %f %f", &x, &y, &z);
 
-			xyz.push_back(x);
-			xyz.push_back(y);
-			xyz.push_back(z);
+			(*this).xyz.push_back(x);
+			(*this).xyz.push_back(y);
+			(*this).xyz.push_back(z);
 
 			i = i + 1;
 
@@ -139,10 +139,12 @@ void loadSTL::render()
 
 	for (int i = 0; i < tri_num * 9; i = i + 3)
 	{
-		//printf("x: %f y: %f z: %f \n",xyz[i],xyz[i+1],xyz[i+2]);
+		//printf("x: %f y: %f z: %f \n",(*this).xyz[i],(*this).xyz[i+1],(*this).xyz[i+2]);
 		glColor3f(1.0, 0.0, 1.0);
-		glVertex3f(xyz[i], xyz[i + 1], xyz[i + 2]);
 
+
+		glVertex3f((*this).xyz[i], (*this).xyz[i + 1], (*this).xyz[i + 2]);
+	
 	}
 
 	glEnd();
