@@ -15,6 +15,7 @@
 
 #include "KeyEnterReceiver.h"
 
+
 #include "Load.h"
 
 class QGL : public QOpenGLWidget, protected QOpenGLFunctions
@@ -52,18 +53,25 @@ public:
 
     void project_cursor();
 
+    void get_croodinate_windows();
 
     void multiplyMatrices(const float* matrix1, const float* matrix2, float* result);
+
+    void selectTriangle(RenderAssist obj);
 
     ~QGL();
 
     KeyEnterReceiver* obj_key;
+
+    vector<RenderAssist> triangles;
 
 protected:
 
 
     void initializeGL() override
     {
+        //tri_index.push_back(0);
+
 
         initializeOpenGLFunctions();
 
@@ -75,8 +83,29 @@ protected:
 
     void resizeGL(int w, int h) override
     {
+        int tempx = w / 2;
+        int tempy = h / 2;
         
-        glViewport(0, 0, w, h);
+        glViewport(-tempx, -tempy, w, h);
+
+        GLenum error = glGetError();
+        if (error != GL_NO_ERROR) {
+            // Handle or print the error
+
+            qDebug() << "found a bug help!";
+        }
+        else
+        {
+            qDebug() << "tempx: " << tempx;
+            qDebug() << "tempy: " << tempy;
+            glGetIntegerv(GL_VIEWPORT, viewport);
+            qDebug() << "viewports: ";
+            qDebug() <<  viewport[0];
+            qDebug() <<  viewport[1];
+            qDebug() << viewport[2];
+            qDebug() <<  viewport[3];
+
+        }
 
     }
 
@@ -88,27 +117,37 @@ protected:
         camera();
 
         glMatrixMode(matrixMode);
+       
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 
         glPolygonMode(polygonFace,polygonMode);
 
         glLoadIdentity();
-
-
-        glGetFloatv(GL_MODELVIEW_MATRIX, view);
-
-
+        
+        glGetDoublev(GL_MODELVIEW_MATRIX, modelview);        
+        
+        glPushMatrix();
+        
         glTranslatef(view_x, view_y, 0.0f);
 
         glRotatef(anglex,0.0f,1.0f,0.0f);
 
-        glRotatef(angley, 1.0f, 0.0f, 0.0f);
+        glRotatef(angley, 1.0f, 0.0f, 0.0f); 
 
-        load.render();
+        load.render(triangles);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPopMatrix();
 
-        this->project_cursor();
-        
+
+        this->project_cursor();   
+
+
+        for(int i = 0; i < tri_index.size(); i++)
+            selectTriangle(triangles.at(i));
+
+
+       
         glFlush();
 
     }
@@ -120,25 +159,9 @@ public slots:
         xwin = this->width();
         ywin = this->height();
 
-        /*
-        if(obj_key->isLeftKeyPressed == true) 
-            this->return_view_x(-0.01f);
-        if(obj_key->isUpKeyPressed == true) 
-            this->return_view_y(0.01f);
-        if(obj_key->isRightKeyPressed == true) 
-            this->return_view_x(0.01f);
-        if(obj_key->isDownKeyPressed == true) 
-            this->return_view_y(-0.01f);
-        */
-
         // Convert the position to the OpenGL coordinate system.
         mx = ((2.0f * obj_key->return_x(this) / xwin) - 1.0f);
         my = (1.0f - (2.0f * obj_key->return_y(this) / ywin));
-
-        /*
-        qDebug() << "standard cursor x: " << obj_key->return_x(this) << " standard cursor y: " << obj_key->return_y(this);
-
-        qDebug() << "cursor x: " << mx << " cursor y: " << my;*/
 
         // Grab the screen and move the scene around.
         if (obj_key->isLeftMouseButtonPressed == true)
@@ -193,6 +216,17 @@ public slots:
             view_z = 45.0f;
         }
 
+        for (int i = 0; i < triangles.size(); i++)
+        {
+
+            if (triangles.at(i).isPointInsideTriangle2D((float)posX, (float)posY, 0.0) == true)
+            {
+                tri_index.push_back(i);
+            }
+
+        }
+
+
         update();
     
     }
@@ -212,7 +246,9 @@ private:
             camera_x, camera_y, 0.0f,
             0.0f,  1.0f, 0.0f);
 
-        glGetFloatv(GL_PROJECTION_MATRIX, lookat);
+       // glGetFloatv(GL_PROJECTION_MATRIX, lookat);
+
+        glGetDoublev(GL_PROJECTION_MATRIX, projection);
 
 
         project_y = tan(view_z*0.5f)*1.0f;
@@ -242,6 +278,17 @@ private:
     GLfloat view[16];
 
     GLfloat lookat[16];
+
+    GLint viewport[4];
+
+    GLdouble projection[16];
+    GLdouble modelview[16];
+
+
+    GLdouble posX, posY, posZ;
+
+    vector<int> tri_index;
+
 
     GLfloat delta;
 

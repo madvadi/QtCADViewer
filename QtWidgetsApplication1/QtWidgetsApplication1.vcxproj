@@ -98,6 +98,7 @@
   <ItemGroup>
     <ClCompile Include="KeyEnterReceiver.cpp" />
     <ClCompile Include="OpenglRender.cpp" />
+    <ClCompile Include="RenderAssist.cpp" />
     <ClCompile Include="TableViewCustom.cpp" />
     <ClCompile Include="TextBrowserLogger.cpp" />
     <QtRcc Include="DT_GUI_Window.qrc" />
@@ -110,6 +111,7 @@
   <ItemGroup>
     <QtMoc Include="KeyEnterReceiver.h" />
     <ClInclude Include="Load.h" />
+    <ClInclude Include="RenderAssist.h" />
     <ClInclude Include="TextBrowserLogger.h" />
     <QtMoc Include="TableViewCustom.h" />
     <QtMoc Include="OpenglRender.h" />

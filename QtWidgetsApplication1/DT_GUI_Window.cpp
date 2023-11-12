@@ -18,7 +18,7 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
 
 
     QPixmap pix("Logo.bmp");
-    QPixmap pix1("ZoomInIcon.bmp");
+    /*QPixmap pix1("ZoomInIcon.bmp");
     QPixmap pix2("ZoomOutIcon.bmp");
 
     QPixmap pix3("RotateLeft.bmp");
@@ -31,14 +31,14 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
     QIcon IC2(pix2);
     QIcon IC3(pix3);
     QIcon IC4(pix4);
-    QIcon IC5(pix5);
+    QIcon IC5(pix5);*/
 
     QGraphicsScene* scene = new QGraphicsScene();
 
     scene->addPixmap(pix);
 
     ui.graphicsView->setScene(scene);
-    
+    /*
     ui.pushButton->setIcon(IC1);
     ui.pushButton->setIconSize(pix1.rect().size());
 
@@ -62,7 +62,7 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
     ui.pushButton_7->setIcon(IC5);
     ui.pushButton_7->setIconSize(pix5.rect().size());
     ui.pushButton_8->setIcon(IC5);
-    ui.pushButton_8->setIconSize(pix5.rect().size());
+    ui.pushButton_8->setIconSize(pix5.rect().size());*/
 
  
     this->setCentralWidget(ui.centralwidget);

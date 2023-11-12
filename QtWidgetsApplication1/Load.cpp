@@ -131,11 +131,15 @@ void loadSTL::loadASCII(const char* filename)
 
 };
 
-void loadSTL::render()
+void loadSTL::render(vector<RenderAssist>& RA_ptr)
 {
 
-
-	glBegin(GL_TRIANGLE_STRIP);
+	glBegin(GL_TRIANGLE_STRIP);		
+	
+	int count = 0;		
+	
+	
+	RenderAssist temp;
 
 	for (int i = 0; i < tri_num * 9; i = i + 3)
 	{
@@ -144,7 +148,26 @@ void loadSTL::render()
 
 
 		glVertex3f((*this).xyz[i], (*this).xyz[i + 1], (*this).xyz[i + 2]);
+
 	
+	
+
+		temp.x[count][0] = (*this).xyz[i];
+		temp.x[count][1] = (*this).xyz[i+1];
+		temp.x[count][2] = (*this).xyz[i+2];
+
+
+
+		count = count + 1;
+
+		if (count < 3)
+		{			
+				
+				RA_ptr.push_back(temp);
+
+				count = 0;
+
+		}
 	}
 
 	glEnd();

@@ -11,11 +11,15 @@ QGL::QGL(float x, float y, QWidget* parent) : QOpenGLWidget(parent)
 
     view_y = 0.0f;
     view_x = 0.0f;
-    view_z = 45.0f;
+    view_z = 90.0f;
 
     px = 0.0f;
     py = 0.0f;
     pz = 0.0f;
+
+    posX = 0.0;
+    posY = 0.0;
+    posZ = 0.0;
 
     mx = 0.0f;
     my = 0.0f;
@@ -123,6 +127,8 @@ void QGL::render_star(float x, float y, float z, float size)
 {
     glPushMatrix();
 
+
+
     glBegin(GL_QUADS);
 
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -143,88 +149,69 @@ void QGL::render_star(float x, float y, float z, float size)
 
 void QGL::render_star(double x, double y, double z, double size)
 {
-    glPushMatrix();
 
+    glPushMatrix();
+  
+    glTranslated(x,y,z);
+      
     glBegin(GL_QUADS);
 
     glColor3d(1.0, 1.0, 1.0);
-    glVertex3d(x - size * 0.5, y + size * 0.5, z);
+
+    glVertex3d( -size * 0.5,-size * 0.5, 0.0);
+    glColor3d(1.0, 1.0, 0.0);
+    glVertex3d( -size * 0.5,  size * 0.5, 0.0);
     glColor3d(1.0, 1.0, 1.0);
-    glVertex3d(x - size * 0.5, y - size * 0.5, z);
-    glColor3d(1.0, 1.0, 1.0);
-    glVertex3d(x + size * 0.5, y - size * 0.5, z);
-    glColor3d(1.0, 1.0, 1.0);
-    glVertex3d(x + size * 0.5, y + size * 0.5, z);
+    glVertex3d( size * 0.5,  size * 0.5, 0.0);
+    glColor3d(1.0, 1.0, 0.0);
+    glVertex3d( size * 0.5, -size * 0.5, 0.0);
 
     glEnd();
 
     glPopMatrix();
-
 }
 
 
 void QGL::project_cursor()
 {
     
-    // Convert to NDC
-    float ndcX =  mx;//(2.0f * float(mx)) / float(width()) - 1.0f;
-    float ndcY = my;//1.0f - (2.0f * float(my)) / float(height());
-    
-    GLint viewport[4];
-    GLdouble modelview[16];
-    GLdouble projection[16];
     GLdouble winX, winY, winZ;
-    float depth[2];
-    GLdouble posX, posY, posZ;
 
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-    glGetDoublev(GL_PROJECTION_MATRIX, projection);
     
-    /*
-    ndcY = viewport[3] - ndcY - 1;
-    winX = (float)ndcX;
-    winY = (float)ndcY;
-    glReadPixels((int)winX, (int)winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
 
-    gluUnProject(winX, winY, winZ, modelview,projection, viewport, &posX, &posY, &posZ);*/
-    winX = (GLdouble)obj_key->return_x(this) -1.0;
-    winY = (GLdouble)viewport[3] - (GLdouble)obj_key->return_y(this) -1.0;
+    winX = (GLdouble)obj_key->return_x(this) - viewport[2]/2.0;
+    winY = viewport[3] / 2.0 - (GLdouble)obj_key->return_y(this);
+   
 
-    glReadPixels(winX, winY, 2, 2, GL_DEPTH_COMPONENT, GL_FLOAT, depth);
+    glReadPixels((int)winX, (int)winY, (GLsizei)project_x, (GLsizei)project_y, GL_DEPTH_COMPONENT, GL_DOUBLE, &winZ);
 
-
-    gluUnProject(winX, winY, 0.0, modelview, projection, viewport, &posX, &posY, &posZ);
+    int tr = gluUnProject(winX , winY , winZ,
+        modelview, projection, viewport,
+        &posX, &posY, &posZ);
 
     qDebug() << "posX: " << posX << " posY: " << posY << " posZ: " << posZ;
 
-    this->render_star(posX, posY, posZ,0.001);
-
-   this->render_star(0.5,0.0,0.0,0.01);
-
-    this->render_star(-0.5, 0.0, 0.0, 0.01);
-
-    /*
-    float result[16] = {0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f, 
-    0.0f, 0.0f, 0.0f, 0.0f, 
-    0.0f, 0.0f, 0.0f, 0.0f };
-    multiplyMatrices(lookat, view,result);
-
-
-    float clipX = result[0] * ndcX + result[1] * ndcY + result[3];
-    float clipY = result[4] * ndcX + result[5] * ndcY + result[7];
-    float clipW = result[12] * ndcX + result[13] * ndcY + result[15];
-
-    // Convert from clip coordinates to world coordinates
-    float sceneX = clipX / clipW;
-    float sceneY = clipY / clipW;
-
-    // Place cursor on the back plate!
-    this->render_star(sceneX, sceneY, 0.9f, 0.01f);*/
+    this->render_star(posX, posY , posZ, 0.00001);
 
 };
 
+
+void QGL::selectTriangle(RenderAssist obj)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPushMatrix();
+
+    glBegin(GL_TRIANGLES);
+
+    glVertex3f(obj.x[0][0], obj.x[0][1], obj.x[0][2]);
+    glVertex3f(obj.x[1][0], obj.x[1][1], obj.x[1][2]);
+    glVertex3f(obj.x[2][0], obj.x[2][1], obj.x[2][2]);
+
+    glEnd();
+
+    glPopMatrix();
+
+};
 
 void QGL::initPolygon(GLenum polFace, GLenum polMode)
 {

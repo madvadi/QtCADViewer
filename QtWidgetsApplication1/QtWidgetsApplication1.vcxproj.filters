@@ -55,12 +55,18 @@
     <ClCompile Include="KeyEnterReceiver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderAssist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Load.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TextBrowserLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderAssist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

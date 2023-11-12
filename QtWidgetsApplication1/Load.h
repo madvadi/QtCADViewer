@@ -10,6 +10,9 @@
 #include <qopenglwidget.h>
 #include <qopenglfunctions.h>→
 
+
+
+#include "RenderAssist.h"
 //#include <math>
 
 
@@ -28,7 +31,7 @@ public:
 
 	void loadASCII(const char* filename);
 
-	void render();
+	void render(vector<RenderAssist>& RA_ptr);
 
 	std::vector<float> xyz;
 
