@@ -23,7 +23,7 @@ class QGL : public QOpenGLWidget, protected QOpenGLFunctions
     Q_OBJECT
 public:
 
-    QGL(float x, float y, QWidget* parent = nullptr);
+    QGL(float x, float y,QWidget* ptr_qwidget, QWidget* parent = nullptr);
 
     void initColor(float r, float g, float b);
 
@@ -59,6 +59,8 @@ public:
 
     void selectTriangle(RenderAssist obj);
 
+    GLdouble return_posZ();
+
     ~QGL();
 
     KeyEnterReceiver* obj_key;
@@ -70,23 +72,49 @@ protected:
 
     void initializeGL() override
     {
-        //tri_index.push_back(0);
-
 
         initializeOpenGLFunctions();
 
-        camera();
+       
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        
+        //glDepthRange(zNear, zFar);
+
+        camera();        
+                
+        /*
+        // Set up framebuffer
+        glGenFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+        // Set up depth buffer
+        glGenRenderbuffers(1, &depthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, xwin, ywin);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+        // Check framebuffer status
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            std::cerr << "Framebuffer is not complete" << std::endl;
+        }
+        */
 
         glClearColor(0.0, 0.0, 0.0, 0.0);  
-
+       // glClearDepth(1.0f);
     }
 
     void resizeGL(int w, int h) override
     {
+        
         int tempx = w / 2;
         int tempy = h / 2;
-        
-        glViewport(-tempx, -tempy, w, h);
+
+        //glViewport(-tempx, -tempy, w, h);
+        //glScissor(-tempx, -tempy, w, h);
+        glViewport(0, 0, w, h);
+        //glViewport(0, 0, xwin, ywin);
+        //glScissor(0, 0, xwin, ywin);
 
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
@@ -100,14 +128,16 @@ protected:
             qDebug() << "tempy: " << tempy;
             glGetIntegerv(GL_VIEWPORT, viewport);
             qDebug() << "viewports: ";
-            qDebug() <<  viewport[0];
-            qDebug() <<  viewport[1];
+            qDebug() << viewport[0];
+            qDebug() << viewport[1];
             qDebug() << viewport[2];
-            qDebug() <<  viewport[3];
+            qDebug() << viewport[3];
 
         }
 
-    }
+    };
+
+    
 
     void paintGL() override
     {
@@ -117,40 +147,39 @@ protected:
         camera();
 
         glMatrixMode(matrixMode);
-       
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-
-        glPolygonMode(polygonFace,polygonMode);
+        glPolygonMode(polygonFace, polygonMode);
 
         glLoadIdentity();
-        
-        glGetDoublev(GL_MODELVIEW_MATRIX, modelview);        
-        
+
+        glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+
         glPushMatrix();
-        
+
+        /*glScalef(100.0f, 100.0f, 100.0f);
+
         glTranslatef(view_x, view_y, 0.0f);
 
-        glRotatef(anglex,0.0f,1.0f,0.0f);
+        glRotatef(anglex, 0.0f, 1.0f, 0.0f);
 
-        glRotatef(angley, 1.0f, 0.0f, 0.0f); 
+        glRotatef(angley, 1.0f, 0.0f, 0.0f);*/
 
-        load.render(triangles);
+        //load.render(triangles);
+
+        //this->render_star(0.0f, 0.0f, -0.05f, 1.0f);
+        this->render_star(0.0f, 0.0f, 0.05f, 0.1f);
 
         glPopMatrix();
 
+        this->project_cursor();
 
-        this->project_cursor();   
-
-
+        /*
         for(int i = 0; i < tri_index.size(); i++)
-            selectTriangle(triangles.at(i));
+            selectTriangle(triangles.at(i));*/
 
-
-       
         glFlush();
 
-    }
+    };
 
 public slots:
 
@@ -216,16 +245,6 @@ public slots:
             view_z = 45.0f;
         }
 
-        for (int i = 0; i < triangles.size(); i++)
-        {
-
-            if (triangles.at(i).isPointInsideTriangle2D((float)posX, (float)posY, 0.0) == true)
-            {
-                tri_index.push_back(i);
-            }
-
-        }
-
 
         update();
     
@@ -238,9 +257,7 @@ private:
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity(); 
 
-        gluPerspective(/*45.0f */ view_z, (float)width() / (float)height(), 0.01f, 100.0f);
-
-
+        gluPerspective( view_z, (float)width() / (float)height(), (GLfloat)zNear, (GLfloat)zFar);
 
         gluLookAt(camera_x,camera_y, 1.0f,
             camera_x, camera_y, 0.0f,
@@ -262,8 +279,16 @@ private:
 
     };
 
+    QWidget* ptr_widget;
+
     float xwin;
     float ywin;
+
+    // Set up framebuffer
+    GLuint fbo;
+
+    // Set up depth buffer
+    GLuint depthBuffer;
 
     GLenum polygonFace;
     GLenum polygonMode;
@@ -289,18 +314,15 @@ private:
 
     vector<int> tri_index;
 
-
     GLfloat delta;
 
     std::vector<GLfloat> glTrans3f[3];
 
     float view_x, view_y, view_z;
 
-
     float mx,my;
 
     float camera_x, camera_y;
-
 
     float project_y, project_x;
 
@@ -313,6 +335,8 @@ private:
     float anglex, angley;
 
     float midx, midy;
+
+    GLdouble zNear,zFar;
 
     loadSTL load;
 };

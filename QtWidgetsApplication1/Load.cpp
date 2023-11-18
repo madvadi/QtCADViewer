@@ -138,6 +138,7 @@ void loadSTL::render(vector<RenderAssist>& RA_ptr)
 	
 	int count = 0;		
 	
+	float scale = 100.0f;
 	
 	RenderAssist temp;
 
@@ -147,16 +148,12 @@ void loadSTL::render(vector<RenderAssist>& RA_ptr)
 		glColor3f(1.0, 0.0, 1.0);
 
 
-		glVertex3f((*this).xyz[i], (*this).xyz[i + 1], (*this).xyz[i + 2]);
+		glVertex3f((*this).xyz[i]* scale, (*this).xyz[i + 1] * scale -2.5f, (*this).xyz[i + 2] * scale );
 
-	
-	
 
 		temp.x[count][0] = (*this).xyz[i];
 		temp.x[count][1] = (*this).xyz[i+1];
-		temp.x[count][2] = (*this).xyz[i+2];
-
-
+		temp.x[count][2] = (*this).xyz[i+2] ;
 
 		count = count + 1;
 

@@ -24,8 +24,9 @@ public:
 
 	//void mouseMoveEvent(QMouseEvent* event)  override;
 
-
 	void resizeGLContext();
+
+	void PrintTo();
 
 	~DT_GUI_WidgetTest();
 
@@ -42,6 +43,12 @@ private:
 	Ui::Form ui;
 
 protected:
+	
+	void mouseMoveEvent(QEvent* QPtr_event)
+	{
+		this->PrintTo();
+
+	};
 
 
 
