@@ -5,8 +5,8 @@
 
 #include <QtOpenGL>
 #include <gl\GLU.h>
-#include <glm\vec3.hpp> 
-#include <glm\glm.hpp>  
+#include <glm\vec3.hpp> //
+#include <glm\glm.hpp>  //
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
 #include <glm\ext\matrix_projection.hpp>
@@ -14,10 +14,11 @@
 #include <qopenglwidget.h>
 #include <qopenglfunctions.h>
 #include <qkeysequence.h>
-#include <qtimer.h>
+#include <qtimer.h> 
+
 
 #include "KeyEnterReceiver.h"
-#include "BitmapIcon.h"
+
 
 #include "Load.h"
 
@@ -62,15 +63,7 @@ public:
 
     void selectTriangle(RenderAssist obj);
 
-    void dselectTriangle(RenderAssist obj, double matrix[16]);
-
-    void multiplyMatrixVector(const double* matrix1, double* vector);
-
-    void multiplyMatrixVector(const double* matrix1, double& posX, double& posY, double& posZ);
-
-    void multiplyMatrices(const double* matrix1, const double* matrix2, double* result);
-
-    int addLayer(QString filename, int x, int y);
+    int addLayer(void* pixels);
 
     int uiOverLay();
 
@@ -88,38 +81,73 @@ protected:
     void initializeGL() override
     {
 
-        initializeOpenGLFunctions();
 
-       
+        initializeOpenGLFunctions();
+        /*
+        makeCurrent();
+
+        QPair<int, int> pair = this->format().version();
+
+        qDebug() << "OpenGL version: " << pair;
+
+        // Create a QSurfaceFormat object
+        QSurfaceFormat format;
+
+        // Set the desired OpenGL version
+        format.setVersion(pair.first, pair.second); // For example, OpenGL 3.3
+
+        format.setProfile(QSurfaceFormat::CoreProfile); // Use core profile
+        format.setSwapBehavior(QSurfaceFormat::DoubleBuffer); // Enable double buffering
+        format.setRenderableType(QSurfaceFormat::OpenGL);
+
+        // Set other attributes as needed, such as depth buffer size, stencil buffer size, etc.
+        format.setDepthBufferSize(24);
+        format.setStencilBufferSize(8);
+
+        setFormat(format);
+       */
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         
         //glDepthRange(zNear, zFar);
 
         camera();        
-       
+                
+        /*
+        // Set up framebuffer
+        glGenFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-        glClearColor(0.0, 0.0, 0.0, 0.5);  
+        // Set up depth buffer
+        glGenRenderbuffers(1, &depthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, xwin, ywin);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+        // Check framebuffer status
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            std::cerr << "Framebuffer is not complete" << std::endl;
+        }
+        */
+
+        glClearColor(0.0, 0.0, 0.0, 0.0);  
        // glClearDepth(1.0f);
     }
 
     void resizeGL(int w, int h) override
     {
-        glViewport(0,0,w,h);
+        
 
-        xwin = w;
-        ywin = h;
 
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
             // Handle or print the error
 
             qDebug() << "found a bug help!";
+            qDebug() << "Error: " << error;
         }
         else
         {
-
-
             glGetIntegerv(GL_VIEWPORT, viewport);
             qDebug() << "viewports: ";
             qDebug() << viewport[0];
@@ -136,15 +164,11 @@ protected:
     void paintGL() override
     {
 
-
-
         glClear(parClear);
 
         camera();
 
-        glMatrixMode(matrixMode);        
-        
-
+        glMatrixMode(matrixMode);
 
         glPolygonMode(polygonFace, polygonMode);
 
@@ -152,10 +176,9 @@ protected:
 
         glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
 
-      
         glPushMatrix();
 
-        glScalef(10.0f, 10.0f, 10.0f);
+        //glScalef(100.0f, 100.0f, 100.0f);
 
         glTranslatef(view_x, view_y, 0.0f);
 
@@ -163,16 +186,18 @@ protected:
 
         glRotatef(angley, 1.0f, 0.0f, 0.0f);
 
-        glGetDoublev(GL_MODELVIEW_MATRIX, getmatrixofmodel);
-
-        load.render(triangles,posX, posY, posZ);
+        load.render(triangles);
 
         glPopMatrix();
 
-        this->uiOverLay();
+       
 
-        this->project_cursor();
+        /*
+        for(int i = 0; i < tri_index.size(); i++)
+            selectTriangle(triangles.at(i));*/ 
         
+        this->project_cursor();
+
         glFlush();
 
     };
@@ -181,7 +206,8 @@ public slots:
 
     void animate()
     {
-
+        xwin = this->width();
+        ywin = this->height();
 
         // Convert the position to the OpenGL coordinate system.
         mx = ((2.0f * obj_key->return_x(this) / xwin) - 1.0f);
@@ -252,14 +278,7 @@ private:
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity(); 
 
-        glGetIntegerv(GL_VIEWPORT, viewport);
-
-        gluPerspective( view_z, /*(float)width() / (float)height()*/(float)viewport[2]/(float)viewport[3], (GLfloat)zNear, (GLfloat)zFar);
-
-        GLdouble aspectRatio = static_cast<GLdouble>(viewport[2]) / static_cast<GLdouble>(viewport[3]);
-        tanHalfFovy = tanf(qDegreesToRadians(static_cast<GLdouble>(view_z)) / 2.0);
-
-
+        gluPerspective( view_z, (float)width() / (float)height(), (GLfloat)zNear, (GLfloat)zFar);
 
         gluLookAt(camera_x,camera_y, 1.0f,
             camera_x, camera_y, 0.0f,
@@ -281,17 +300,10 @@ private:
 
     };
 
-    vector<GLbitmap> icon;
-
     QWidget* ptr_widget;
-
-    GLdouble tanHalfFovy;
 
     float xwin;
     float ywin;
-
-    GLfloat xwindow;
-    GLfloat ywindow;
 
     // Set up framebuffer
     GLuint fbo;
@@ -317,8 +329,6 @@ private:
 
     GLdouble projection[16];
     GLdouble modelview[16];
-
-    double getmatrixofmodel[16];
 
 
     GLdouble posX, posY, posZ;

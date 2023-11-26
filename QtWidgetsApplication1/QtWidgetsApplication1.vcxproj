@@ -96,6 +96,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BitmapIcon.cpp" />
     <ClCompile Include="KeyEnterReceiver.cpp" />
     <ClCompile Include="OpenglRender.cpp" />
     <ClCompile Include="RenderAssist.cpp" />
@@ -110,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="KeyEnterReceiver.h" />
+    <ClInclude Include="BitmapIcon.h" />
     <ClInclude Include="Load.h" />
     <ClInclude Include="RenderAssist.h" />
     <ClInclude Include="TextBrowserLogger.h" />

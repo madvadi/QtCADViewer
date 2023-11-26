@@ -1,4 +1,11 @@
+#include <glm\vec3.hpp> 
+#include <glm\glm.hpp>  
+#include <glm\gtc\matrix_transform.hpp>
+#include <glm\gtc\type_ptr.hpp>
+#include <glm\ext\matrix_projection.hpp>
+
 #include "Load.h"
+
 
 
 loadSTL::loadSTL()
@@ -48,9 +55,9 @@ void loadSTL::loadBIN(const char* filename)
 
 	cout << "You are at this position: " << ftell(PTRFILE) << endl;
 
-	int num_crood = (int)ceil(9 * Ntrig);
+	int num_coord = (int)ceil(9 * Ntrig);
 
-	(*this).xyz_f = new float[num_crood];
+	(*this).xyz_f = new float[num_coord];
 
 	fseek(PTRFILE, 12 * sizeof(char), SEEK_CUR);
 
@@ -89,7 +96,7 @@ void loadSTL::loadASCII(const char* filename)
 	int count = 0;
 
 	// buffer
-	float x, y, z;
+	double x, y, z;
 
 	fseek(PTRFILE, 0, SEEK_END);
 
@@ -100,6 +107,8 @@ void loadSTL::loadASCII(const char* filename)
 
 	char ch[100];
 
+	(*this).xyz.resize(3);
+
 	fscanf(PTRFILE, "%s", ch);
 
 	while (error != EOF)
@@ -108,11 +117,11 @@ void loadSTL::loadASCII(const char* filename)
 
 		if (strstr(ch, "vertex") != NULL)
 		{
-			fscanf(PTRFILE, "%f %f %f", &x, &y, &z);
+			fscanf(PTRFILE, "%lf %lf %lf", &x, &y, &z);
 
-			(*this).xyz.push_back(x);
-			(*this).xyz.push_back(y);
-			(*this).xyz.push_back(z);
+			(*this).xyz.at(0).push_back(x);
+			(*this).xyz.at(1).push_back(y);
+			(*this).xyz.at(2).push_back(z);
 
 			i = i + 1;
 
@@ -131,41 +140,120 @@ void loadSTL::loadASCII(const char* filename)
 
 };
 
-void loadSTL::render(vector<RenderAssist>& RA_ptr)
+void loadSTL::render(vector<RenderAssist>& RA_ptr, GLdouble posX,GLdouble posY,GLdouble posZ)
 {
 
-	glBegin(GL_TRIANGLE_STRIP);		
-	
-	int count = 0;		
-	
-	float scale = 100.0f;
-	
-	RenderAssist temp;
+	GLfloat modelview[16];
 
-	for (int i = 0; i < tri_num * 9; i = i + 3)
-	{
-		//printf("x: %f y: %f z: %f \n",(*this).xyz[i],(*this).xyz[i+1],(*this).xyz[i+2]);
-		glColor3f(1.0, 0.0, 1.0);
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+
+	glm::mat4x4 GLMmodelview = glm::make_mat4x4(modelview);
+
+	glBegin(GL_TRIANGLES);		
+
+	bool b = false;
+
+	for (int i = 0; i < (tri_num) * 3; i = i + 3)
+	{	
+		
+		RenderAssist temp;
+
+		glm::vec<4, float> coord[3];
+
+		coord[0] = glm::vec<4, float>((*this).xyz.at(0).at(i), (*this).xyz.at(1).at(i), (*this).xyz.at(2).at(i), 1.0);
+
+		coord[0] = GLMmodelview * coord[0];
+
+		coord[0] /= coord[0].w;
+
+		temp.x[0][0] = coord[0].x;
+		temp.x[0][1] = coord[0].y;
+		temp.x[0][2] = coord[0].z;
+
+		coord[1] = glm::vec<4, float>((*this).xyz.at(0).at(i+1), (*this).xyz.at(1).at(i+1), (*this).xyz.at(2).at(i+1), 1.0);
+
+		coord[1] = GLMmodelview * coord[1];
+
+		coord[1] /= coord[1].w;
+
+		temp.x[1][0] = coord[1].x;
+		temp.x[1][1] = coord[1].y;
+		temp.x[1][2] = coord[1].z;
+
+		coord[2] = glm::vec<4, float>((*this).xyz.at(0).at(i+2), (*this).xyz.at(1).at(i+2), (*this).xyz.at(2).at(i+2), 1.0);
+
+		coord[2] = GLMmodelview * coord[2];
+
+		coord[2] /= coord[2].w;
 
 
-		glVertex3f((*this).xyz[i]* scale, (*this).xyz[i + 1] * scale -2.5f, (*this).xyz[i + 2] * scale );
+		temp.x[2][0] = coord[2].x;
+		temp.x[2][1] = coord[2].y;
+		temp.x[2][2] = coord[2].z;
 
 
-		temp.x[count][0] = (*this).xyz[i];
-		temp.x[count][1] = (*this).xyz[i+1];
-		temp.x[count][2] = (*this).xyz[i+2] ;
+		float col = 0.0f ;
+		if (temp.isPointInsideTriangle3D((float)posX, (float)posY, (float)posZ)== true )
+		{
 
-		count = count + 1;
+			col = 1.0f;
+			b = true;	
 
-		if (count < 3)
-		{			
-				
-				RA_ptr.push_back(temp);
+			qDebug() << "i = " << i;
 
-				count = 0;
+			qDebug() << "Coordinates pos transform: ";
 
+			qDebug() << "posX = " << posX << " posY = " << posY << " posZ = " << posZ;
+
+			for (int i_ = 0; i_ < 3; i_ = i_ + 1)
+			{
+				qDebug() << i_ <<" vector x = " << coord[i_].x << " y = " << coord[i_].y << " z = " << coord[i_].z;
+
+				qDebug() << "Before trans. x = " << (*this).xyz.at(0).at(i+i_) << " y = " << (*this).xyz.at(1).at(i+i_) << " z = " << (*this).xyz.at(2).at(i+i_);
+
+			}
+
+	    }
+		else
+		{
+			col = 0.7f;
 		}
+		qDebug() << "posX = " << posX << " posY = " << posY << " posZ = " << posZ;
+
+		glColor3f(col, col, col);
+
+		glVertex3f((*this).xyz.at(0).at(i), (*this).xyz.at(1).at(i), (*this).xyz.at(2).at(i));
+
+		glColor3f(col, col, col);
+
+		glVertex3f((*this).xyz.at(0).at(i+1), (*this).xyz.at(1).at(i+1), (*this).xyz.at(2).at(i+1));
+
+		glColor3f(col, col, col);
+
+		glVertex3f((*this).xyz.at(0).at(i+2), (*this).xyz.at(1).at(i+2), (*this).xyz.at(2).at(i+2));
+
+	}
+
+
+
+	glEnd();
+
+
+	glPolygonOffset(-2.5f, -2.5f);
+	glLineWidth(60.0f);
+
+	glBegin(GL_LINES); 
+
+	for (int i = 0; i < (tri_num)*3-1; i = i + 1)
+	{
+		glColor3f(0.5f, 0.6f, 0.7f);
+		glVertex3f((*this).xyz.at(0).at(i), (*this).xyz.at(1).at(i), (*this).xyz.at(2).at(i));
+		glColor3f(0.5f, 0.6f, 0.7f);
+		glVertex3f((*this).xyz.at(0).at(i + 1), (*this).xyz.at(1).at(i + 1), (*this).xyz.at(2).at(i + 1));
+
 	}
 
 	glEnd();
+
+
 };

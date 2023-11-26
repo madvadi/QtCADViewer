@@ -6,15 +6,15 @@ QGL::QGL(float x, float y,QWidget* pptr_qwidget ,QWidget* parent) : QOpenGLWidge
     ptr_widget = pptr_qwidget;
     
 
-    xwindow = x;
-    ywindow = y;
+    xwin = x;
+    ywin = y;
 
     view_y = 0.0f;
     view_x = 0.0f;
     view_z = 90.0f;
 
-    zNear = 0.05;
-    zFar = 100.0;
+    zNear = 0.80;
+    zFar = 2.0;
 
     px = 0.0f;
     py = 0.0f;
@@ -42,16 +42,13 @@ QGL::QGL(float x, float y,QWidget* pptr_qwidget ,QWidget* parent) : QOpenGLWidge
     delta = 0.0f;
 
     polygonFace = GL_FRONT_AND_BACK;
-    polygonMode = GL_FILL;
+    polygonMode =  GL_LINE;
 
     matrixMode = GL_MODELVIEW;
 
     parClear = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 
-    load.loadASCII("openfoamM.stl");
-    //load.loadASCII("TriangleTest.stl");
-    //load.loadASCII("TriangleTest3.stl");
-    //load.loadASCII("TriangleTest2.stl");
+    load.loadASCII("openfoamM.stl");      
     
     for (int i = 0; i < 16; i++) {
         matrix[i] = 0.0f;
@@ -66,27 +63,8 @@ QGL::QGL(float x, float y,QWidget* pptr_qwidget ,QWidget* parent) : QOpenGLWidge
     timer->start(16); // 60 FPS
 
     setMouseTracking(true);    
+ 
     
-    QPair<int,int> pair = this->format().version();
-
-    qDebug() << "OpenGL version: " << pair;
-
-    // Create a QSurfaceFormat object
-    QSurfaceFormat format;
-
-    // Set the desired OpenGL version
-    format.setVersion(pair.first, pair.second); // For example, OpenGL 3.3
-
-    format.setProfile(QSurfaceFormat::CoreProfile); // Use core profile
-    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer); // Enable double buffering
-    format.setRenderableType(QSurfaceFormat::OpenGL);
-
-    // Set other attributes as needed, such as depth buffer size, stencil buffer size, etc.
-    format.setDepthBufferSize(24);
-    format.setStencilBufferSize(8);
-
-    setFormat(format);
-   
 };
 
 
@@ -104,46 +82,6 @@ void QGL::multiplyMatrices(const float* matrix1, const float* matrix2, float* re
     glGetFloatv(GL_MODELVIEW_MATRIX, result);
     glPopMatrix();
 }
-
-void QGL::multiplyMatrices(const double* matrix1, const double* matrix2, double* result) {
-
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; ++j)
-        {
-            result[i * 4 + j] = 0.0;
-            for (int k = 0; k < 4; k = ++k)
-            {
-                result[i + j * 4] += matrix1[i  + k* 4]*matrix[k+j*4];
-
-            }
-        }
-    }
-};
-
-
-void QGL::multiplyMatrixVector(const double* matrix1, double* vector)
-{
-    if (vector == NULL || matrix1 == NULL)
-        return;
-
-    vector[0] = matrix1[0] * vector[0] + matrix1[4] * vector[1] + matrix1[8] * vector[2] + matrix1[12] * vector[3];
-    vector[1] = matrix1[1] * vector[0] + matrix1[5] * vector[1] + matrix1[9] * vector[2] + matrix1[13] * vector[3];
-    vector[2] = matrix1[2] * vector[0] + matrix1[6] * vector[1] + matrix1[10] * vector[2] + matrix1[14] * vector[3];
-
-
-};
-
-void QGL::multiplyMatrixVector(const double* matrix1, double& posX, double& posY, double& posZ )
-{
-    if ( matrix1 == NULL)
-        return;
-
-    posX = matrix1[0] * posX + matrix1[4] * posY + matrix1[8] * posZ + matrix1[12] *1.0;
-    posY = matrix1[1] * posX + matrix1[5] * posY + matrix1[9] * posZ + matrix1[13] *1.0;
-    posZ = matrix1[2] * posX + matrix1[6] * posY + matrix1[10] * posZ + matrix1[14] * 1.0;
-
-};
 
 
 void QGL::initMatrixMode(GLenum matMode)
@@ -235,7 +173,6 @@ void QGL::render_star(double x, double y, double z, double size)
     glPopMatrix();
 }
 
-
 double convertZ(double n, double f, double z)
 {
     // Convert Z from [0, 1] to [-1, 1]
@@ -252,15 +189,15 @@ double world_convertZ(double n, double f, double z)
 {
     GLdouble clip_z = (z - 0.5) * 2.0;
     GLdouble world_z = 2 * f * n / (clip_z * (f - n) - (f + n));//((f - n) / 2.0)* clip_z + (f + n) / 2.0;//
-  
+
 
     return world_z;
 };
 
 double NDCZ(double n, double f, double z)
 {
-  
-  
+
+
 
     return (z - 0.5) * 2.0;
 };
@@ -277,67 +214,62 @@ float world_convertZ(float n, float f, float z)
 
 void QGL::project_cursor()
 {
-    
+
     GLdouble winX, winY, winZ;
 
     GLfloat fwinZ = 0.0f;
 
-    GLfloat depth_range[2] = {0.0f,0.0f};
+    GLfloat depth_range[2] = { 0.0f,0.0f };
 
-    glGetFloatv(GL_DEPTH_RANGE,depth_range);
-
-    glViewport(0, 0, xwin, ywin);
+    glGetFloatv(GL_DEPTH_RANGE, depth_range);
 
     glGetIntegerv(GL_VIEWPORT, viewport);
     glGetDoublev(GL_PROJECTION_MATRIX, projection);
     glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
 
-    
+    /*
     qDebug() << "viewport[3] = " << viewport[3];
     qDebug() << "viewport[2] = " << viewport[2];
     qDebug() << "viewport[1] = " << viewport[1];
-    qDebug() << "viewport[0] = " << viewport[0];
+    qDebug() << "viewport[0] = " << viewport[0];*/
 
-    
+
     // Convert the position to the OpenGL coordinate system.
-    mx = ( ( 2.0f*obj_key->return_x(this) / xwin) - 1.0f);
-    my = (1.0f - (2.0f * obj_key->return_y(this) / ywin));
-
-    qDebug() << "mx = " << mx;
-    qDebug() << "my = " << my;
+    mx = ((2.0f * obj_key->return_x(this) / viewport[2]) - 1.0f);
+    my = (1.0f - (2.0f * obj_key->return_y(this) / viewport[3]));
 
     winX = (GLdouble)obj_key->return_x(this);
-    winY = ywin - (GLdouble)obj_key->return_y(this);
-    
+    winY = viewport[3] - (GLdouble)obj_key->return_y(this);
+
     glReadPixels((int)winX, (int)winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &fwinZ);
 
     winZ = static_cast<GLdouble>(fwinZ);
 
     GLdouble adjustedDepth = NDCZ(zNear, zFar, winZ);
 
-    glm::vec<4, GLdouble> ClipCoords(mx, my, adjustedDepth,1.0);
+    glm::vec<4, GLdouble> ClipCoords(mx, my, adjustedDepth, 1.0);
 
     //multiplyMatrices(projection, getmatrixofmodel,  result);
-    glm::vec<4,int> viewportGLM = glm::make_vec4(viewport);
+    glm::vec<4, int> viewportGLM = glm::make_vec4(viewport);
     glm::mat<4, 4, GLdouble> projGLM = glm::make_mat4x4(projection);
     glm::mat<4, 4, GLdouble> viewGLM = glm::make_mat4x4(modelview);
 
-    
-    glm::vec4 worldCoords = glm::inverse(projGLM*viewGLM)* ClipCoords;
 
-    posX = worldCoords.x/ worldCoords.w;
+    glm::vec4 worldCoords = glm::inverse(projGLM * viewGLM) * ClipCoords;
+
+    posX = worldCoords.x / worldCoords.w;
     posY = worldCoords.y / worldCoords.w;
     posZ = worldCoords.z / worldCoords.w;
 
 
 };
 
-int QGL::addLayer(QString filename, int x, int y)
+int QGL::addLayer(void* pixels)
 {
-    //Needs Work
-    icon.push_back(GLbitmap());
 
-    icon.back().initial(filename,x,y);
+    unsigned char* pixelOverlay = NULL;
+    //Needs Work
+    pixelOverlay = static_cast<unsigned char*>(pixels);
 
     return 0;
 };
@@ -346,15 +278,12 @@ int QGL::uiOverLay()
 {
     //Needs Work
 
+    unsigned char* pixelOverlay = NULL;
+
     glDisable(GL_DEPTH_TEST);
 
-    for (int i = 0; i < icon.size(); i++)
-    {
-
-        glRasterPos2i(icon.at(i).x, icon.at(i).y);
-        glDrawPixels(icon.at(i).iconImage.width(), icon.at(i).iconImage.height(), GL_RGBA, GL_UNSIGNED_BYTE, icon.at(i).iconImage.bits());
-
-    }
+    glRasterPos2i(10, 10);
+    glDrawPixels(100, 100, GL_RGB, GL_UNSIGNED_BYTE, pixelOverlay);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -367,57 +296,18 @@ int QGL::uiOverLay()
 
 void QGL::selectTriangle(RenderAssist obj)
 {
-    
-
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glPushMatrix();
 
     glBegin(GL_TRIANGLES);
 
-    glColor3f(0.0f,1.0f,1.0f);
     glVertex3f(obj.x[0][0], obj.x[0][1], obj.x[0][2]);
-    glColor3f(0.0f, 1.0f, 1.0f);
     glVertex3f(obj.x[1][0], obj.x[1][1], obj.x[1][2]);
-    glColor3f(0.0f, 1.0f, 1.0f);
     glVertex3f(obj.x[2][0], obj.x[2][1], obj.x[2][2]);
 
     glEnd();
 
     glPopMatrix();
-
-
-};
-
-
-void QGL::dselectTriangle(RenderAssist obj, double matrix[16])
-{
-    double scale = 10.0;
-
-
-    //qDebug() << "---";
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glPushMatrix();
-
-    glMultMatrixd(matrix);
-
-    glTranslated(0.0,0.0, 0.001);
-
-    glBegin(GL_TRIANGLES);
-
-    for (int i = 0; i<3; i++)
-    {
-        glColor3d(1.0, 1.0, 1.0);
-        glVertex3d(obj.dx[i][0], obj.dx[i][1], obj.dx[i][2]);
-        //qDebug() << "x = " << obj.dx[i][0] << " y = " << obj.dx[i][1] << " z = " << obj.dx[i][2];
-
-    }
-    glEnd();
-
-    //qDebug() << "---";
-
-    glPopMatrix();
-
 
 };
 

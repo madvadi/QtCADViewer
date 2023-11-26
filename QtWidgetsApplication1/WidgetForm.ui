@@ -110,24 +110,22 @@
     <addaction name="actionSaveAs"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuOptions">
-    <property name="title">
-     <string>Options&amp;</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View&amp;</string>
     </property>
+    <addaction name="actionLine"/>
+    <addaction name="actionFill"/>
+    <addaction name="actionColor"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
-     <string>About&amp;</string>
+     <string>Help&amp;</string>
     </property>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menugfdjlfdj"/>
    <addaction name="menuView"/>
-   <addaction name="menuOptions"/>
    <addaction name="menuAbout"/>
   </widget>
   <action name="actionOpen">
@@ -148,6 +146,26 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit&amp;</string>
+   </property>
+  </action>
+  <action name="actionLine">
+   <property name="text">
+    <string>Line&amp;</string>
+   </property>
+  </action>
+  <action name="actionFill">
+   <property name="text">
+    <string>Fill&amp;</string>
+   </property>
+  </action>
+  <action name="actionColor">
+   <property name="text">
+    <string>Color&amp;</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About&amp;</string>
    </property>
   </action>
  </widget>

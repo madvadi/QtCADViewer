@@ -11,7 +11,6 @@ public:
 
 	bool get_centre(float x, float y, float z);
 	bool isPointInsideTriangle3D(float x, float y, float z);
-	bool isPointInsideTriangle3D(double x, double y, double z);
 
 	float dotProduct( float v1[3],  float v2[3]);
 
@@ -23,33 +22,14 @@ public:
 	// Function to subtract two vectors
 	float* subtractVectors2D(float v1[3], float v2[3]);
 
-	void subtractVectors(double v1[3], double v2[3], double* temp);
-
-	void subtractVectors(float v1[3], float v2[3], float* temp);
-
-	double dotProduct(double v1[3], double v2[3]);
-
-	// Function to subtract two vectors
-	double* subtractVectors(double v1[3], double v2[3]);
-
-	double dotProduct2D(double v1[3], double v2[3]);
-
-	// Function to subtract two vectors
-	double* subtractVectors2D(double v1[3], double v2[3]);
-
-
 	bool isPointInsideTriangle2D(float x, float y, float z);
 
 
 	~RenderAssist();
 
 
-	// Triangle information.
+	// Triangle infromation.
 	float x[3][3];
-
-	double dx[3][3];
-
-
 
 };
 

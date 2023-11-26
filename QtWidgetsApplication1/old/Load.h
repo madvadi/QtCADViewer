@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <cstdio>
-#include <cmath>
 #include <vector>
 
 #include "qopengl.h"
@@ -32,9 +31,9 @@ public:
 
 	void loadASCII(const char* filename);
 
-	void render(vector<RenderAssist>& RA_ptr, GLdouble posX, GLdouble posY, GLdouble posZ);
+	void render(vector<RenderAssist>& RA_ptr);
 
-	std::vector<std::vector<float>> xyz;
+	std::vector<float> xyz;
 
 private:
 
