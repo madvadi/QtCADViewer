@@ -13,6 +13,8 @@ public:
 	bool isPointInsideTriangle3D(float x, float y, float z);
 	bool isPointInsideTriangle3D(double x, double y, double z);
 
+	void CrossProduct(float v1[3], float v2[3], float* temp);
+
 	float dotProduct( float v1[3],  float v2[3]);
 
 	// Function to subtract two vectors

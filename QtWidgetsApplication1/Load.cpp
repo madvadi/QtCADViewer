@@ -193,7 +193,7 @@ void loadSTL::render(vector<RenderAssist>& RA_ptr, GLdouble posX,GLdouble posY,G
 
 
 		float col = 0.0f ;
-		if (temp.isPointInsideTriangle3D((float)posX, (float)posY, (float)posZ)== true )
+		if (temp.isPointInsideTriangle3D((float)posX, (float)posY, (float)posZ)== true &&b==false)
 		{
 
 			col = 1.0f;
@@ -218,7 +218,7 @@ void loadSTL::render(vector<RenderAssist>& RA_ptr, GLdouble posX,GLdouble posY,G
 		{
 			col = 0.7f;
 		}
-		qDebug() << "posX = " << posX << " posY = " << posY << " posZ = " << posZ;
+		//qDebug() << "posX = " << posX << " posY = " << posY << " posZ = " << posZ;
 
 		glColor3f(col, col, col);
 
@@ -234,13 +234,10 @@ void loadSTL::render(vector<RenderAssist>& RA_ptr, GLdouble posX,GLdouble posY,G
 
 	}
 
-
-
 	glEnd();
 
-
 	glPolygonOffset(-2.5f, -2.5f);
-	glLineWidth(60.0f);
+	glLineWidth(2.0f);
 
 	glBegin(GL_LINES); 
 

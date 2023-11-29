@@ -23,7 +23,7 @@ DT_GUI_WidgetTest::DT_GUI_WidgetTest(QWidget* parent)
 
     ui.graphicsView->setScene(scene);
 
-    gl_ptr->addLayer("Logo2.bmp",0,0);
+    gl_ptr->addLayer("Logo2.PNG",0,0);
 
     this->setCentralWidget(ui.centralwidget);
 

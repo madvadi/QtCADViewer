@@ -89,7 +89,8 @@ protected:
     {
 
         initializeOpenGLFunctions();
-
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
        
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
@@ -136,15 +137,11 @@ protected:
     void paintGL() override
     {
 
-
-
         glClear(parClear);
 
         camera();
 
         glMatrixMode(matrixMode);        
-        
-
 
         glPolygonMode(polygonFace, polygonMode);
 

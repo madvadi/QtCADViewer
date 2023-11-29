@@ -13,7 +13,7 @@ QGL::QGL(float x, float y,QWidget* pptr_qwidget ,QWidget* parent) : QOpenGLWidge
     view_x = 0.0f;
     view_z = 90.0f;
 
-    zNear = 0.05;
+    zNear = 0.7;
     zFar = 100.0;
 
     px = 0.0f;
@@ -49,9 +49,6 @@ QGL::QGL(float x, float y,QWidget* pptr_qwidget ,QWidget* parent) : QOpenGLWidge
     parClear = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 
     load.loadASCII("openfoamM.stl");
-    //load.loadASCII("TriangleTest.stl");
-    //load.loadASCII("TriangleTest3.stl");
-    //load.loadASCII("TriangleTest2.stl");
     
     for (int i = 0; i < 16; i++) {
         matrix[i] = 0.0f;
@@ -66,26 +63,7 @@ QGL::QGL(float x, float y,QWidget* pptr_qwidget ,QWidget* parent) : QOpenGLWidge
     timer->start(16); // 60 FPS
 
     setMouseTracking(true);    
-    
-    QPair<int,int> pair = this->format().version();
 
-    qDebug() << "OpenGL version: " << pair;
-
-    // Create a QSurfaceFormat object
-    QSurfaceFormat format;
-
-    // Set the desired OpenGL version
-    format.setVersion(pair.first, pair.second); // For example, OpenGL 3.3
-
-    format.setProfile(QSurfaceFormat::CoreProfile); // Use core profile
-    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer); // Enable double buffering
-    format.setRenderableType(QSurfaceFormat::OpenGL);
-
-    // Set other attributes as needed, such as depth buffer size, stencil buffer size, etc.
-    format.setDepthBufferSize(24);
-    format.setStencilBufferSize(8);
-
-    setFormat(format);
    
 };
 
@@ -286,28 +264,22 @@ void QGL::project_cursor()
 
     glGetFloatv(GL_DEPTH_RANGE,depth_range);
 
-    glViewport(0, 0, xwin, ywin);
+    glViewport(-xwin/2,-ywin/2, xwin, ywin);
 
     glGetIntegerv(GL_VIEWPORT, viewport);
     glGetDoublev(GL_PROJECTION_MATRIX, projection);
     glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
 
     
-    qDebug() << "viewport[3] = " << viewport[3];
-    qDebug() << "viewport[2] = " << viewport[2];
-    qDebug() << "viewport[1] = " << viewport[1];
-    qDebug() << "viewport[0] = " << viewport[0];
-
-    
     // Convert the position to the OpenGL coordinate system.
     mx = ( ( 2.0f*obj_key->return_x(this) / xwin) - 1.0f);
     my = (1.0f - (2.0f * obj_key->return_y(this) / ywin));
 
-    qDebug() << "mx = " << mx;
-    qDebug() << "my = " << my;
-
     winX = (GLdouble)obj_key->return_x(this);
     winY = ywin - (GLdouble)obj_key->return_y(this);
+
+    qDebug() << "xwin = " << winX;
+    qDebug() << "ywin = " << winY;
     
     glReadPixels((int)winX, (int)winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &fwinZ);
 
@@ -350,10 +322,23 @@ int QGL::uiOverLay()
 
     for (int i = 0; i < icon.size(); i++)
     {
+        glPushMatrix();
 
-        glRasterPos2i(icon.at(i).x, icon.at(i).y);
-        glDrawPixels(icon.at(i).iconImage.width(), icon.at(i).iconImage.height(), GL_RGBA, GL_UNSIGNED_BYTE, icon.at(i).iconImage.bits());
+        glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
 
+        glm::mat4x4 modelviewGLM = glm::make_mat4x4(modelview);
+
+        glm::vec<4, GLdouble> screen(icon.at(i).x+camera_x, icon.at(i).y + camera_y,0.0,0.0);
+
+        screen = modelviewGLM * screen;
+        glRasterPos2d(screen[0], screen[1]);
+
+        glDrawPixels(icon.at(i).iconImage.width(), 
+            icon.at(i).iconImage.height(), 
+            GL_RGBA, GL_UNSIGNED_BYTE, 
+            icon.at(i).iconImage.bits());
+
+        glPopMatrix();
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -391,10 +376,6 @@ void QGL::selectTriangle(RenderAssist obj)
 
 void QGL::dselectTriangle(RenderAssist obj, double matrix[16])
 {
-    double scale = 10.0;
-
-
-    //qDebug() << "---";
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glPushMatrix();
@@ -409,12 +390,10 @@ void QGL::dselectTriangle(RenderAssist obj, double matrix[16])
     {
         glColor3d(1.0, 1.0, 1.0);
         glVertex3d(obj.dx[i][0], obj.dx[i][1], obj.dx[i][2]);
-        //qDebug() << "x = " << obj.dx[i][0] << " y = " << obj.dx[i][1] << " z = " << obj.dx[i][2];
 
     }
     glEnd();
 
-    //qDebug() << "---";
 
     glPopMatrix();
 

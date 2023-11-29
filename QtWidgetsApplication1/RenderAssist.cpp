@@ -105,7 +105,14 @@ void RenderAssist::subtractVectors(float v1[3], float v2[3], float* temp) {
 	temp[2] = v1[2] - v2[2];
 };
 
-	
+// Function to calculate dot product of two vectors
+void RenderAssist::CrossProduct(float v1[3], float v2[3], float* temp) {
+
+	temp[0] = v1[1] * v2[2] - v1[2] * v2[1];
+	temp[1] = v1[2] * v2[0] - v1[0] * v2[2];
+	temp[2] = v1[0] * v2[1] - v1[1] * v2[0];
+
+};
 
 
 // Function to subtract two vectors
@@ -173,14 +180,26 @@ bool RenderAssist::isPointInsideTriangle3D(float x, float y, float z) {
 	float uw = dotProduct(u, w);
 	float vw = dotProduct(v, w);
 
+	float check[3] = { 0.0f,0.0f,0.0f };
+
+	this->CrossProduct(u, v, check);
+
+	float planeCheck = dotProduct(check, w);
+
 	// Calculate barycentric coordinates
 	float denom = uu * vv - uv * uv;
 
 	float u_bary = (vv * uw - uv * vw) / denom;
 	float v_bary = (uu * vw - uv * uw) / denom;
 
+	float w_bary = 1.0f - u_bary - v_bary;
+
 	// Check if the point is inside the triangle
-	bool bswitch = (u_bary >= 0.0f && v_bary >= 0.0f && (u_bary + v_bary) < 1.0f);
+	bool bswitch = (u_bary >= 0.0f
+		&& v_bary >= 0.0f
+		&& w_bary >= 0.0f
+		&& u_bary + v_bary + w_bary == 1.0f
+		&& abs(planeCheck) <= 0.00001f);
 
 	return bswitch;
 

@@ -27,6 +27,8 @@ int GLbitmap::initial(QString filename, int px, int py)
 
     (*this).iconImage.mirror(false,true);
 
+    (*this).iconImage.convertToFormat(QImage::Format_RGBA8888);
+
     (*this).x = px;
     (*this).y = py;
 
